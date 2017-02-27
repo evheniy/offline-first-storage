@@ -165,7 +165,7 @@ describe('Offline first storage', () => {
                 isUpdateCacheDate = true;
                 await redis.set(`date_${key}`, new Date().valueOf());
             },
-            ttl: 100,
+            ttl: 1000,
         });
 
         await redis.set(`date_${key}`, new Date().valueOf());
@@ -212,7 +212,7 @@ describe('Offline first storage', () => {
                 isUpdateCacheDate = true;
                 await redis.set(`date_${key}`, new Date().valueOf());
             },
-            ttl: 10,
+            ttl: 1,
         });
 
         await redis.set(`date_${key}`, new Date().valueOf());
