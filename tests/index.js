@@ -59,6 +59,8 @@ describe('Offline first storage', () => {
         let isGetCacheDate = false;
         let isUpdateCacheDate = false;
 
+        const timeNow = new Date().valueOf().toString(10);
+
         const ofs = new OFS({
             async getDataFromSource() {
                 isGetDataFromSource = true;
@@ -79,7 +81,7 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, (new Date().valueOf() - 100).toString(10));
+                await redis.set(`date_${key}`, timeNow);
             },
             ttl: 0,
         });
@@ -91,7 +93,7 @@ describe('Offline first storage', () => {
         expect(isGetDataFromCache).is.true;
         expect(isGetDataFromSource).is.true;
         expect(isSetDataToCache).is.true;
-        expect(isGetCacheDate).is.true;
+        expect(isGetCacheDate).is.false;
         expect(isUpdateCacheDate).is.true;
 
         expect(data).to.be.equal('test');
@@ -104,6 +106,8 @@ describe('Offline first storage', () => {
         let isGetCacheDate = false;
         let isUpdateCacheDate = false;
 
+        const timeNow = new Date().valueOf().toString(10);
+
         const ofs = new OFS({
             async getDataFromSource() {
                 isGetDataFromSource = true;
@@ -124,7 +128,7 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, (new Date().valueOf() - 100).toString(10));
+                await redis.set(`date_${key}`, timeNow);
             },
             ttl: 0,
         });
@@ -151,6 +155,10 @@ describe('Offline first storage', () => {
         let isGetCacheDate = false;
         let isUpdateCacheDate = false;
 
+        const timeNow = new Date().valueOf().toString(10);
+
+        await redis.set(key, 'test');
+
         const ofs = new OFS({
             async getDataFromSource() {
                 isGetDataFromSource = true;
@@ -171,20 +179,20 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, new Date().valueOf().toString(10));
+                await redis.set(`date_${key}`, timeNow);
             },
-            ttl: 1000,
+            ttl: 10000,
         });
 
-        await redis.set(`date_${key}`, new Date().valueOf().toString(10));
+        await redis.set(`date_${key}`, timeNow);
 
         const data = await ofs.getData();
 
         await pause(10);
 
         expect(isGetDataFromCache).is.true;
-        expect(isGetDataFromSource).is.true;
-        expect(isSetDataToCache).is.true;
+        expect(isGetDataFromSource).is.false;
+        expect(isSetDataToCache).is.false;
         expect(isGetCacheDate).is.true;
         expect(isUpdateCacheDate).is.false;
 
@@ -198,6 +206,10 @@ describe('Offline first storage', () => {
         let isGetCacheDate = false;
         let isUpdateCacheDate = false;
 
+        const timeNow = new Date().valueOf().toString(10);
+
+        await redis.set(key, 'test');
+
         const ofs = new OFS({
             async getDataFromSource() {
                 isGetDataFromSource = true;
@@ -218,14 +230,12 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, new Date().valueOf().toString(10));
+                await redis.set(`date_${key}`, timeNow);
             },
-            ttl: 1,
+            ttl: 0,
         });
 
-        await redis.set(`date_${key}`, new Date().valueOf().toString(10));
-
-        await pause(10);
+        await redis.set(`date_${key}`, timeNow);
 
         const data = await ofs.getData();
 
