@@ -5,9 +5,15 @@ const Redis = require('ioredis');
 const redis = new Redis(config.redis);
 const pause = require('promise-pause-timeout');
 const OFS = require('../index');
+
 const key = 'test';
 
 describe('Offline first storage', () => {
+
+    beforeEach(async () => {
+        await redis.del(key);
+        await redis.del(`date_${key}`);
+    });
 
     afterEach(async () => {
         await redis.del(key);
@@ -73,7 +79,7 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, new Date().valueOf());
+                await redis.set(`date_${key}`, new Date().valueOf().toString(10));
             },
         });
 
@@ -117,7 +123,7 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, new Date().valueOf());
+                await redis.set(`date_${key}`, new Date().valueOf().toString(10));
             },
         });
 
@@ -163,12 +169,12 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, new Date().valueOf());
+                await redis.set(`date_${key}`, new Date().valueOf().toString(10));
             },
             ttl: 1000,
         });
 
-        await redis.set(`date_${key}`, new Date().valueOf());
+        await redis.set(`date_${key}`, new Date().valueOf().toString(10));
 
         const data = await ofs.getData();
 
@@ -210,12 +216,12 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, new Date().valueOf());
+                await redis.set(`date_${key}`, new Date().valueOf().toString(10));
             },
             ttl: 1,
         });
 
-        await redis.set(`date_${key}`, new Date().valueOf());
+        await redis.set(`date_${key}`, new Date().valueOf().toString(10));
 
         await pause(10);
 
