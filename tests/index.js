@@ -88,7 +88,7 @@ describe('Offline first storage', () => {
 
         const data = await ofs.getData();
 
-        await pause(10);
+        await pause(100);
 
         expect(isGetDataFromCache).is.true;
         expect(isGetDataFromSource).is.true;
@@ -134,10 +134,11 @@ describe('Offline first storage', () => {
         });
 
         await redis.set(key, 'test');
+        await redis.set(`date_${key}`, timeNow);
 
         const data = await ofs.getData();
 
-        await pause(10);
+        await pause(100);
 
         expect(isGetDataFromCache).is.true;
         expect(isGetDataFromSource).is.true;
@@ -158,6 +159,7 @@ describe('Offline first storage', () => {
         const timeNow = new Date().valueOf().toString(10);
 
         await redis.set(key, 'test');
+        await redis.set(`date_${key}`, timeNow);
 
         const ofs = new OFS({
             async getDataFromSource() {
@@ -184,11 +186,9 @@ describe('Offline first storage', () => {
             ttl: 10000,
         });
 
-        await redis.set(`date_${key}`, timeNow);
-
         const data = await ofs.getData();
 
-        await pause(10);
+        await pause(100);
 
         expect(isGetDataFromCache).is.true;
         expect(isGetDataFromSource).is.false;
@@ -209,6 +209,7 @@ describe('Offline first storage', () => {
         const timeNow = new Date().valueOf().toString(10);
 
         await redis.set(key, 'test');
+        await redis.set(`date_${key}`, timeNow);
 
         const ofs = new OFS({
             async getDataFromSource() {
@@ -235,11 +236,9 @@ describe('Offline first storage', () => {
             ttl: 0,
         });
 
-        await redis.set(`date_${key}`, timeNow);
-
         const data = await ofs.getData();
 
-        await pause(10);
+        await pause(100);
 
         expect(isGetDataFromCache).is.true;
         expect(isGetDataFromSource).is.true;
