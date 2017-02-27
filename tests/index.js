@@ -90,7 +90,7 @@ describe('Offline first storage', () => {
         expect(data).to.be.equal('test');
     });
 
-    it('should test flow with actual data', async () => {
+    it('should test flow with cached data', async () => {
         let isGetDataFromCache = false;
         let isGetDataFromSource = false;
         let isSetDataToCache = false;
@@ -121,6 +121,53 @@ describe('Offline first storage', () => {
             },
         });
 
+        await redis.set(key, 'test');
+
+        const data = await ofs.getData();
+
+        await pause(10);
+
+        expect(isGetDataFromCache).is.true;
+        expect(isGetDataFromSource).is.true;
+        expect(isSetDataToCache).is.true;
+        expect(isGetCacheDate).is.true;
+        expect(isUpdateCacheDate).is.true;
+
+        expect(data).to.be.equal('test');
+    });
+
+    it('should test flow with actual data', async () => {
+        let isGetDataFromCache = false;
+        let isGetDataFromSource = false;
+        let isSetDataToCache = false;
+        let isGetCacheDate = false;
+        let isUpdateCacheDate = false;
+
+        const ofs = new OFS({
+            async getDataFromSource() {
+                isGetDataFromSource = true;
+                return 'test';
+            },
+            async getDataFromCache() {
+                isGetDataFromCache = true;
+                return redis.get(key);
+            },
+
+            async setDataToCache(data) {
+                isSetDataToCache = true;
+                await redis.set(key, data);
+            },
+            async getCacheDate() {
+                isGetCacheDate = true;
+                return redis.get(`date_${key}`);
+            },
+            async updateCacheDate() {
+                isUpdateCacheDate = true;
+                await redis.set(`date_${key}`, new Date().valueOf());
+            },
+            ttl: 100,
+        });
+
         await redis.set(`date_${key}`, new Date().valueOf());
 
         const data = await ofs.getData();
@@ -132,6 +179,55 @@ describe('Offline first storage', () => {
         expect(isSetDataToCache).is.true;
         expect(isGetCacheDate).is.true;
         expect(isUpdateCacheDate).is.false;
+
+        expect(data).to.be.equal('test');
+    });
+
+    it('should test flow with actual data and small ttl', async () => {
+        let isGetDataFromCache = false;
+        let isGetDataFromSource = false;
+        let isSetDataToCache = false;
+        let isGetCacheDate = false;
+        let isUpdateCacheDate = false;
+
+        const ofs = new OFS({
+            async getDataFromSource() {
+                isGetDataFromSource = true;
+                return 'test';
+            },
+            async getDataFromCache() {
+                isGetDataFromCache = true;
+                return redis.get(key);
+            },
+
+            async setDataToCache(data) {
+                isSetDataToCache = true;
+                await redis.set(key, data);
+            },
+            async getCacheDate() {
+                isGetCacheDate = true;
+                return redis.get(`date_${key}`);
+            },
+            async updateCacheDate() {
+                isUpdateCacheDate = true;
+                await redis.set(`date_${key}`, new Date().valueOf());
+            },
+            ttl: 10,
+        });
+
+        await redis.set(`date_${key}`, new Date().valueOf());
+
+        await pause(10);
+
+        const data = await ofs.getData();
+
+        await pause(10);
+
+        expect(isGetDataFromCache).is.true;
+        expect(isGetDataFromSource).is.true;
+        expect(isSetDataToCache).is.true;
+        expect(isGetCacheDate).is.true;
+        expect(isUpdateCacheDate).is.true;
 
         expect(data).to.be.equal('test');
     });
