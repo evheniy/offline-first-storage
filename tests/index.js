@@ -79,8 +79,9 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, new Date().valueOf().toString(10));
+                await redis.set(`date_${key}`, (new Date().valueOf() - 100).toString(10));
             },
+            ttl: 0,
         });
 
         const data = await ofs.getData();
@@ -123,8 +124,9 @@ describe('Offline first storage', () => {
             },
             async updateCacheDate() {
                 isUpdateCacheDate = true;
-                await redis.set(`date_${key}`, new Date().valueOf().toString(10));
+                await redis.set(`date_${key}`, (new Date().valueOf() - 100).toString(10));
             },
+            ttl: 0,
         });
 
         await redis.set(key, 'test');

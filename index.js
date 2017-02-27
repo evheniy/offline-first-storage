@@ -50,7 +50,7 @@ module.exports = class {
 
                 debug(new Date().valueOf());
 
-                const timeWithTTL = ((parseInt(time, 10) || 0) + parseInt(this.config.ttl, 10));
+                const timeWithTTL = ((parseInt(time, 10) || new Date().valueOf()) + parseInt(this.config.ttl, 10));
 
                 debug(timeWithTTL);
 
