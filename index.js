@@ -19,6 +19,7 @@ module.exports = class {
                 },
                 async getCacheDate() {},
                 async updateCacheDate() {},
+                timeoutErrorHandler() {},
                 ttl: 86400, // 24 hours
             },
             config
@@ -48,25 +49,31 @@ module.exports = class {
                     const timeNow = new Date().valueOf();
                     debug('Time now: %s', timeNow);
 
-                    const time = await this.config.getCacheDate();
-                    debug('Cached time: %s', time);
+                    try {
+                        const time = await this.config.getCacheDate();
+                        debug('Cached time: %s', time);
 
-                    const timeWithTTL = ((parseInt(time, 10) || new Date().valueOf()) + parseInt(this.config.ttl, 10));
-                    debug('Time with TTL: %s', timeWithTTL);
+                        const timeWithTTL = ((parseInt(time, 10) || new Date().valueOf()) + parseInt(this.config.ttl, 10));
+                        debug('Time with TTL: %s', timeWithTTL);
 
-                    const isDateActual = timeWithTTL > new Date().valueOf();
-                    debug(isDateActual);
+                        const isDateActual = timeWithTTL > new Date().valueOf();
+                        debug(isDateActual);
 
-                    if (!isDateActual) {
+                        if (!isDateActual) {
 
-                        debug('Updating data');
-                        await this.config.setDataToCache(
-                            await this.config.getDataFromSource()
-                        );
+                            debug('Updating data');
+                            await this.config.setDataToCache(
+                                await this.config.getDataFromSource()
+                            );
 
-                        debug('Updating date');
-                        await this.config.updateCacheDate();
+                            debug('Updating date');
+                            await this.config.updateCacheDate();
+                        }
+
+                    } catch (error) {
+                        this.config.timeoutErrorHandler(error);
                     }
+
                 },
                 0
             );

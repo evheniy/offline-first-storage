@@ -249,4 +249,115 @@ describe('Offline first storage', () => {
         expect(data).to.be.equal('test');
     });
 
+    it('should test flow with timeoutErrorHandler', async () => {
+        let isGetDataFromCache = false;
+        let isGetDataFromSource = false;
+        let isSetDataToCache = false;
+        let isGetCacheDate = false;
+        let isUpdateCacheDate = false;
+        let isTimeoutErrorHandler = false;
+
+        const timeNow = new Date().valueOf().toString(10);
+
+        await redis.set(key, 'test');
+        await redis.set(`date_${key}`, timeNow);
+
+        const ofs = new OFS({
+            async getDataFromSource() {
+                isGetDataFromSource = true;
+                return 'test';
+            },
+            async getDataFromCache() {
+                isGetDataFromCache = true;
+                return redis.get(key);
+            },
+
+            async setDataToCache(data) {
+                isSetDataToCache = true;
+                await redis.set(key, data);
+            },
+            async getCacheDate() {
+                isGetCacheDate = true;
+                return redis.get(`date_${key}`);
+            },
+            async updateCacheDate() {
+                isUpdateCacheDate = true;
+                await redis.set(`date_${key}`, timeNow);
+                throw new Error('test');
+            },
+            timeoutErrorHandler() {
+                isTimeoutErrorHandler = true;
+            },
+            ttl: 0,
+        });
+
+        const data = await ofs.getData();
+
+        await pause(100);
+
+        expect(isGetDataFromCache).is.true;
+        expect(isGetDataFromSource).is.true;
+        expect(isSetDataToCache).is.true;
+        expect(isGetCacheDate).is.true;
+        expect(isUpdateCacheDate).is.true;
+        expect(isTimeoutErrorHandler).is.true;
+
+        expect(data).to.be.equal('test');
+    });
+
+    it('should test flow with timeoutErrorHandler without time record', async () => {
+        let isGetDataFromCache = false;
+        let isGetDataFromSource = false;
+        let isSetDataToCache = false;
+        let isGetCacheDate = false;
+        let isUpdateCacheDate = false;
+        let isTimeoutErrorHandler = false;
+
+        const timeNow = new Date().valueOf().toString(10);
+
+        await redis.set(key, 'test');
+
+        const ofs = new OFS({
+            async getDataFromSource() {
+                isGetDataFromSource = true;
+                return 'test';
+            },
+            async getDataFromCache() {
+                isGetDataFromCache = true;
+                return redis.get(key);
+            },
+
+            async setDataToCache(data) {
+                isSetDataToCache = true;
+                await redis.set(key, data);
+            },
+            async getCacheDate() {
+                isGetCacheDate = true;
+                return redis.get(`date_${key}`);
+            },
+            async updateCacheDate() {
+                isUpdateCacheDate = true;
+                await redis.set(`date_${key}`, timeNow);
+                throw new Error('test');
+            },
+            timeoutErrorHandler() {
+                isTimeoutErrorHandler = true;
+            },
+            ttl: 0,
+        });
+
+        const data = await ofs.getData();
+
+        await pause(100);
+
+        expect(isGetDataFromCache).is.true;
+        expect(isGetDataFromSource).is.true;
+        expect(isSetDataToCache).is.true;
+        expect(isGetCacheDate).is.true;
+        expect(isUpdateCacheDate).is.true;
+        expect(isTimeoutErrorHandler).is.true;
+
+        expect(data).to.be.equal('test');
+    });
+
 });
