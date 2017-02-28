@@ -36,6 +36,8 @@ Offline first logic for yor application
         async setDataToCache(data) {},
         async getCacheDate() {},
         async updateCacheDate() {},
+        timeoutErrorHandler(error) {},
+        ttl: 86400, // 24 hours
     });
     
     const data = await cache.getData();
@@ -63,6 +65,10 @@ Offline first logic for yor application
         async updateCacheDate() {
             await redis.set(`date_${key}`, new Date().valueOf());
         },
+        timeoutErrorHandler(error) {
+            debug(error);
+        },
+        ttl: 86400,
     });
     
     const data = await cache.getData();
@@ -70,5 +76,6 @@ Offline first logic for yor application
     
 ## Links
 
-* [ioredis](https://github.com/luin/ioredis) - promise based redis client
+* [ioredis](https://github.com/luin/ioredis) - promise based node.js redis client
 * [config](https://github.com/lorenwest/node-config) - node.js config
+* [debug](https://github.com/visionmedia/debug) - node.js debugging utility
